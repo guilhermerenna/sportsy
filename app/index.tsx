@@ -8,6 +8,9 @@ export default function Index() {
       <Link href="/exercise" style={styles.button}>
         Exercises
       </Link>
+      <Link href="/sessions" style={styles.button}>
+        Sessions
+      </Link>
     </View>
   );
 }

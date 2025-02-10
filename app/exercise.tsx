@@ -3,7 +3,8 @@ import { Text, View, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingVi
 import { Ionicons } from '@expo/vector-icons';
 import styles from './styles';
 
-interface Exercise {
+export interface Exercise {
+  id: number | undefined;
   name: string;
   musclegroups: string[];
   load: number;
@@ -13,6 +14,7 @@ interface Exercise {
 export default function ExerciseScreen() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [newExercise, setNewExercise] = useState<Exercise>({
+    id: 1,
     name: '',
     musclegroups: [],
     load: 0,
@@ -29,6 +31,7 @@ export default function ExerciseScreen() {
       setExercises([...exercises, newExercise]);
        // Clear input fields after adding:
       setNewExercise({
+        id: undefined,
         name: '',
         musclegroups: [],
         load: 0,
