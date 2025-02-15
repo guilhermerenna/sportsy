@@ -4,12 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import styles from './styles';
 import { Exercise } from './exercises';
 import { Session } from './sessiontemplates';
+import { format } from 'date-fns';
+import RNPickerSelect from 'react-native-picker-select';
 
 export interface ExecutedSession extends Session {
     exercises: Exercise[];
     date: string;
     difficulty: "EASY" | "MEDIUM" | "HARD";
-  }
+}
 
 let mySessionTemplates: Session[] = [
   {
@@ -43,13 +45,19 @@ let exercises: Exercise[] = [
   { id: 4, name: 'Row', musclegroups: ['shoulders', 'biceps', 'forearm'], series: 3, load: 42, repetitions: 12 },
 ]
 
+const getTodayDate = () => {
+  const today = new Date();
+  return format(today, 'yyyy-MMM-dd');
+};
+
 export default function NewSessionScreen() {
 
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
-  const [sessionDate, setSessionDate] = useState<string>('');
-  const [difficulty, setDifficulty] = useState<string>('');
+  const [sessionDate, setSessionDate] = useState<string>(getTodayDate());
+  const [difficulty, setDifficulty] = useState<string>('EASY');
   const [showExerciseOptions, setShowExerciseOptions] = useState<boolean>(false);
   const [sessionTemplates, setSessionTemplates] = useState<Session[]>(mySessionTemplates);
+  const [showTemplateDropdown, setShowTemplateDropdown] = useState<boolean>(false);
 
   const addExerciseToSession = (exercise: Exercise | null) => {
     if (exercise) {
@@ -72,12 +80,17 @@ export default function NewSessionScreen() {
     );
   };
 
-  const updateExercise = (exercise: Exercise, field: 'load' | 'repetitions' | 'name', value: string | number) => {
+  const updateExercise = (exercise: Exercise, field: 'load' | 'repetitions' | 'name' | 'series', value: string | number) => {
     setSelectedExercises((prevExercises) =>
       prevExercises.map((ex) =>
         ex.id === exercise.id ? { ...ex, [field]: value } : ex
       )
     );
+  };
+
+  const handleTemplateSelection = (template: Session) => {
+    setSelectedExercises(template.exercises);
+    setShowTemplateDropdown(false);
   };
 
   const createExecutedSession = () => { 
@@ -96,14 +109,71 @@ export default function NewSessionScreen() {
     console.log('Placeholder! Save it to the database and flush the data in this variable: ', newExecutedSession);
   };
 
+  const renderSelectedExercises = () => {
+    return (<><Text style={styles.text}>Selected Exercises:</Text><ScrollView style={styles.listContainer}>
+      {selectedExercises.map((exercise) => (
+        <View key={exercise.id} style={styles.exerciseRow}>
+          <TextInput
+            style={styles.input}
+            value={exercise.name}
+            onChangeText={(text) => updateExercise(exercise, 'name', text)}
+            placeholder="Exercise name"
+            placeholderTextColor="#aaa"
+          />
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={exercise.series?.toString()}
+            onChangeText={(text) => updateExercise(exercise, 'series', text)}
+            placeholder="# series"
+            placeholderTextColor="#aaa"
+          />
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={exercise.load.toString()}
+            onChangeText={(text) => updateExercise(exercise, 'load', parseFloat(text) || 0)}
+            placeholder="Load (kg)"
+            placeholderTextColor="#aaa"
+          />
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={exercise.repetitions.toString()}
+            onChangeText={(text) => updateExercise(exercise, 'repetitions', parseInt(text) || 0)}
+            placeholder="Repetitions"
+            placeholderTextColor="#aaa"
+          />
+          <TouchableOpacity onPress={() => removeExerciseFromSession(exercise)} style={styles.addButton}>
+            <Ionicons name="remove-circle" size={24} color="red" />
+          </TouchableOpacity>
+        </View>
+      ))}
+    </ScrollView></>)
+  };
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.header}>New Session</Text>
-        <Text style={styles.text}>Select Exercises:</Text>
+        <View style={styles.dateContainer}>
+        <TouchableOpacity onPress={() => setShowTemplateDropdown(!showTemplateDropdown)} style={styles.addButton}>
+          <Text style={styles.addButtonText}>Select Template</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => setShowExerciseOptions(!showExerciseOptions)} style={styles.addButton}>
           <Text style={styles.addButtonText}>Add Exercise</Text>
         </TouchableOpacity>
+        </View>
+
+        {showTemplateDropdown && (
+          <ScrollView style={styles.listContainer}>
+            {sessionTemplates.map((template) => (
+              <TouchableOpacity key={template.name ?? 'selectedTemplate'} onPress={() => handleTemplateSelection(template)} style={styles.exerciseRow}>
+                <Text style={styles.exerciseText}>{template.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
 
         {showExerciseOptions && (
           <ScrollView style={styles.listContainer}>
@@ -118,54 +188,34 @@ export default function NewSessionScreen() {
           </ScrollView>
         )}
 
-        <Text style={styles.text}>Selected Exercises:</Text>
-        <ScrollView style={styles.listContainer}>
-          {selectedExercises.map((exercise) => (
-            <View key={exercise.id} style={styles.exerciseRow}>
-              <TextInput
-                style={styles.input}
-                value={exercise.name}
-                onChangeText={(text) => updateExercise(exercise, 'name', text)}
-                placeholder="Exercise name"
-                placeholderTextColor="#aaa"
-              />
-              <TextInput
-                style={styles.input}
-                keyboardType="numeric"
-                value={exercise.load.toString()}
-                onChangeText={(text) => updateExercise(exercise, 'load', parseFloat(text) || 0)}
-                placeholder="Load (kg)"
-                placeholderTextColor="#aaa"
-              />
-              <TextInput
-                style={styles.input}
-                keyboardType="numeric"
-                value={exercise.repetitions.toString()}
-                onChangeText={(text) => updateExercise(exercise, 'repetitions', parseInt(text) || 0)}
-                placeholder="Repetitions"
-                placeholderTextColor="#aaa"
-              />
-              <TouchableOpacity onPress={() => removeExerciseFromSession(exercise)} style={styles.addButton}>
-                <Ionicons name="remove-circle" size={24} color="red" />
-              </TouchableOpacity>
-            </View>
-          ))}
-        </ScrollView>
-
-        <TextInput
-          style={styles.input}
-          value={sessionDate}
-          onChangeText={setSessionDate}
-          placeholder="Enter session date (e.g., 2025-02-13)"
-          placeholderTextColor="#aaa"
-        />
-        <TextInput
-          style={styles.input}
+        {selectedExercises.length == 0 
+        ? <Text style={styles.text}>Select a workout template or Add Exercises manually!</Text>
+        : renderSelectedExercises()
+        }
+        <View style={styles.dateContainer}>
+          <Text style={styles.text}>Date:</Text>
+          <TextInput
+            style={styles.input}
+            value={sessionDate}
+            onChangeText={setSessionDate}
+            placeholderTextColor="#aaa"
+          />
+        </View>
+        
+        <RNPickerSelect
+          style={{
+            inputIOS: styles.inputGlobal,
+            inputAndroid: styles.inputGlobal,
+            inputWeb: styles.inputGlobal
+          }}
+          onValueChange={(value) => setDifficulty(value)}
+          items={[
+            { label: 'EASY', value: 'EASY' },
+            { label: 'MEDIUM', value: 'MEDIUM' },
+            { label: 'HARD', value: 'HARD' },
+          ]}
           value={difficulty}
-          onChangeText={setDifficulty}
-          placeholder="Enter difficulty level"
-          placeholderTextColor="#aaa"
-        />
+      />
         <TouchableOpacity style={styles.addButton} onPress={createExecutedSession}>
           <Text style={styles.addButtonText}>Save Executed Session</Text>
         </TouchableOpacity>

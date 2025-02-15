@@ -1,7 +1,24 @@
 import { StyleSheet } from 'react-native';
 
-const styles = StyleSheet.create({
+const input = {
+  flex: 1,
+  borderWidth: 1,
+  paddingLeft: 10,
+  paddingRight: 10,
+  color: '#fff',
+  backgroundColor: '#000',
+  padding: 10,
+  marginBottom: 10,
+  borderRadius: 5,
+}
 
+const styles = StyleSheet.create({
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  input,
   button: {
     fontSize: 20,
     textDecorationLine: 'underline',
@@ -56,13 +73,6 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
-  input: {
-    color: '#fff',
-    backgroundColor: '#000',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-  },
   addButton: {
     backgroundColor: '#28a745',
     padding: 10,
@@ -73,6 +83,9 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  inputGlobal: {
+    ...StyleSheet.flatten([input]), // Inherit styles from 'input'
   },
 });
 
