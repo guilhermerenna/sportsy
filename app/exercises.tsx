@@ -9,6 +9,7 @@ export interface Exercise {
   musclegroups: string[];
   load: number;
   repetitions: number;
+  series?: number;
 }
 
 export default function ExerciseScreen() {

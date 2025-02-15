@@ -5,11 +5,17 @@ import styles from './styles';
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Link href="/exercise" style={styles.button}>
+      <Link href="/exercises" style={styles.button}>
         Exercises
       </Link>
-      <Link href="/sessions" style={styles.button}>
-        Sessions
+      <Link href="/sessiontemplates" style={styles.button}>
+        Session Templates
+      </Link>
+      <Link href="/newsession" style={styles.button}>
+        New Session
+      </Link>
+      <Link href="/sessionhistory" style={styles.button}>
+        Session History
       </Link>
     </View>
   );
